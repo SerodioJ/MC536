@@ -14,4 +14,4 @@ Estrutura de pastas:
 A resolução da tarefa 1 se encontra no [notebook](notebook/lab01.ipynb).
 
 ## Tarefa 2 sobre Engenharia Reversa
-![Diagrama](images/diagrama)
+![Diagrama](images/diagrama.png)
