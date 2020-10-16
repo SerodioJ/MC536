@@ -8,6 +8,6 @@ Estrutura de pastas:
 └── notebook   <- arquivos do notebook
 ```
 
-## Tarefas
+## Tarefa sobre Acesso a DBPedia e MeSH
 
 A resolução das tarefas do Lab02 está no [notebook](notebook/lab02.ipynb).
