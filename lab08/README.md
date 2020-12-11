@@ -6,7 +6,7 @@ Estrutura de pastas:
 └── README.md  <- arquivo apresentando a tarefa
 ```
 
-## Tarefa de XPath e XQuery
+## Tarefas com Publicações
 
 ## Questão 1
 
@@ -107,11 +107,11 @@ return <query>
 </query>
 ~~~
 
-## DRON - The Drug Ontology
+## Tarefas com DRON e PubChem
 
 ## Questão 1
 
-Liste todas as classificações que estão dois níveis abaixo da raiz
+Liste o nome de todas as classificações que estão apenas dois níveis imediatamente abaixo da raiz.
 
 ~~~xquery
 let $data := doc('https://raw.githubusercontent.com/santanche/lab2learn/master/data/faers-2017-dron/dron.xml')
@@ -131,16 +131,6 @@ return {data($class/@name), '&#xa;'}
 
 ## Questão 3
 
-Dado o dataset integrado criado via acesso a serviços no Jupyter. Este notebook tem os nomes (e sinônimos) de componentes recuperados do PubChem, em conjunto com o ChEBI do mesmo.
-
-O dataset está disponível em:
-
-https://github.com/santanche/lab2learn/blob/master/data/pubchem/pubchem-chebi-synonyms.xml
-
-Deve ser recuperado em XQuery no endereço:
-
-https://raw.githubusercontent.com/santanche/lab2learn/master/data/pubchem/pubchem-chebi-synonyms.xml
-
 ### Questão 3.1
 
 Liste todos os códigos ChEBI dos componentes disponíveis.
@@ -148,7 +138,13 @@ Liste todos os códigos ChEBI dos componentes disponíveis.
 ~~~xquery
 let $data := doc('https://raw.githubusercontent.com/santanche/lab2learn/master/data/pubchem/pubchem-chebi-synonyms.xml')
 for $component in ($data//Information)
-return {data($component/Synonym[1]), '&#xa;'}
+
+return {
+    for $synonym in ($component/Synonym)
+    let $aux := substring(($synonym), 1,5)
+    where $aux = 'CHEBI'
+    return {data($synonym), '&#xa;'}
+}
 ~~~
 
 ### Questão 3.2
@@ -158,7 +154,13 @@ Liste todos os códigos ChEBI e primeiro nome (sinônimo) de cada um dos compone
 ~~~xquery
 let $data := doc('https://raw.githubusercontent.com/santanche/lab2learn/master/data/pubchem/pubchem-chebi-synonyms.xml')
 for $component in ($data//Information)
-return {data($component/Synonym[1]), '&#xa;', data($component/Synonym[2]) ,'&#xa;------------------------------------------------------&#xa;'}
+
+return {
+    for $synonym in ($component/Synonym)
+    let $aux := substring(($synonym), 1,5)
+    where $aux = 'CHEBI'
+    return {data($synonym), '&#xa;', data($component/Synonym[1]) ,'&#xa;------------------------------------------------------&#xa;'}
+}
 ~~~
 
 ### Questão 3.3
@@ -169,15 +171,19 @@ Para cada código ChEBI, liste os sinônimos e o nome que aparece para o mesmo c
 let $PUBCHEM := doc('https://raw.githubusercontent.com/santanche/lab2learn/master/data/pubchem/pubchem-chebi-synonyms.xml')
 let $DRON := doc('https://raw.githubusercontent.com/santanche/lab2learn/master/data/faers-2017-dron/dron.xml')
 for $componentPUB in ($PUBCHEM//Information)
-return
-{
-    '********************&#xa;Dados PubChem&#xa;********************&#xa;',
-    for $synonym in ($componentPUB/Synonym)
+
+return {
+    for $chebi in ($componentPUB/Synonym)
+    let $aux := substring($chebi, 1,5)
+    where $aux = 'CHEBI'
+    return {
+        '********************&#xa;Dados PubChem - ', data($chebi), '&#xa;********************&#xa;',
+        for $synonym in ($componentPUB/Synonym)
+        let $aux := substring(($synonym), 1,5)
+        where $aux != 'CHEBI'
         return{data($synonym),'&#xa;-----------------------------&#xa;'},
-    '********************&#xa;Dados DRON&#xa;********************&#xa;',
-    for $componentDRON in ($DRON//drug)
-    where $componentDRON/@id = concat('http://purl.obolibrary.org/obo/CHEBI_', substring($componentPUB/Synonym[1], 7)) 
-        return {data($componentDRON/@name),'&#xa;-----------------------------&#xa;'},
-    '########################&#xa;'
+        '********************&#xa;Nome DRON - ',data(($DRON//drug[@id =concat('http://purl.obolibrary.org/obo/CHEBI_', substring($chebi, 7))])[1]/@name),'&#xa;********************&#xa;',
+        '&#xa;########################&#xa;'
+    }
 }
 ~~~
